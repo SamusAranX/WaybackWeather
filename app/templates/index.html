@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+		<title>Wayback Weather</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<script src="{{ url_for('static', filename='ww.js') }}"></script>
+	</head>
+	<body>
+		<div id="container">
+			<h1>Wayback Weather</h1>
+			
+			<div id="start">
+				<p>Wayback Weather uses geolocation to load the correct weather forecast. Click Start to begin.</p>
+
+				<button id="btn-start">Start</button>
+			</div>
+			<div id="loading">
+				<p>Fetching weather data...<br>⏳</p>
+			</div>
+			<div id="error">
+				<p id="errorMessage">Wayback Weather couldn't determine your location. Please reload the page to begin again.</p>
+
+				<button id="btn-reload">Reload Page</button>
+			</div>
+			<div id="weather">
+				<div class="weather historical">
+					<h2>50 years ago</h2>
+					<h3></h3>
+					<span class="icon"></span>
+					<span class="temperature">25°</span>
+					<div class="extremes">
+						<span class="high">28°</span>
+						<span class="low">15°</span>
+					</div>
+				</div>
+				<div class="weather current">
+					<h2>Now</h2>
+					<h3></h3>
+					<span class="icon"></span>
+					<span class="temperature">37°</span>
+					<div class="extremes">
+						<span class="high">38°</span>
+						<span class="low">24°</span>
+					</div>
+				</div>
+			</div>
+			<footer>
+				<p>Made by <a class="twitter" href="https://twitter.com/SamusAranX">@SamusAranX</a>.
+				<p>Uses the <a class="darksky" href="https://darksky.net/dev">Dark Sky API</a>.
+			</footer>
+		</div>
+	</body>
+</html>

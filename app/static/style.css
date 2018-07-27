@@ -1,0 +1,145 @@
+* { box-sizing: border-box; }
+body {
+	background: #000;
+
+	color: #fff;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	font-size: 16pt;
+
+	margin: 0;
+	padding: 0;
+}
+#container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: auto;
+	width: 500px;
+}
+h1 {
+	font-size: 2rem;
+	margin: 0.4em auto;
+	text-align: center;
+}
+p {
+	font-size: 0.9rem;
+	line-height: 1.5;
+	margin: 0;
+	text-align: center;
+	width: 320px;
+}
+button {
+	background: #fff;
+	border: none;
+	border-radius: 1rem;
+	font-size: inherit;
+	font-weight: 700;
+	height: 2rem;
+	margin: 1rem 0;
+	padding: 0;
+}
+button:hover {
+	background: #ddd;
+}
+button:active {
+	background: #222;
+	border: solid 2px #fff;
+}
+
+#start, #loading, #error {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+#weather {
+	display: flex;
+
+	justify-content: center;
+	align-content: stretch;
+
+	width: 100%;
+}
+
+#weather div.weather {
+	/*background: blue;*/
+	flex: 1 0 auto;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	max-width: 200px;
+}
+
+#weather div.weather span.icon {
+	font-size: 2rem;
+}
+
+#weather div.weather span.temperature {
+	font-size: 3rem;
+	font-weight: 100;
+}
+
+#weather div.weather div.extremes {
+	display: flex;
+	justify-content: space-evenly;
+
+	font-size: 1rem;
+	font-weight: 300;
+	width: 64%;
+}
+#weather div.weather div.extremes span.high:before {
+	content: "↑";
+	margin: 0 0.25em 0 0;
+}
+#weather div.weather div.extremes span.low:before {
+	content: "↓";
+	margin: 0 0.25em 0 0;
+}
+
+footer {
+	font-size: 1rem;
+	text-align: center;
+}
+footer a {
+	font-size: inherit;
+	font-weight: 700;
+	/*padding: 0.33rem 1rem;*/
+	text-decoration: none;
+}
+footer a:hover {
+	text-decoration: underline;
+}
+footer a.twitter {
+	color: #1DA1F2;
+}
+footer a.darksky {
+	color: #82A7D2;
+}
+
+#start, #loading, #error, #weather {
+	display: none;
+}
+body:not([class]) #start {
+	display: flex;
+}
+body[class=loading] #loading {
+	display: flex;
+}
+body[class=error] #error {
+	display: flex;
+}
+body[class=weather] #weather {
+	display: flex;
+}
+
+@media only screen and (max-width: 640px) {
+	body {
+		padding: 0 8px;
+	}
+
+	#container {
+		width: 100%;
+	}
+}
