@@ -108,3 +108,8 @@ venv.bak/
 
 # Sublime Text files
 *.sublime-*
+
+# uWSGI log dir
+log/
+
+darksky_config.json

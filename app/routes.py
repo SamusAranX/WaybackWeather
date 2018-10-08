@@ -12,7 +12,7 @@ from random import randint, uniform as randfloat
 from dateutil.relativedelta import relativedelta
 
 from darksky import DarkSkyAPI
-from flask import Flask, request, Response, render_template, jsonify
+from flask import Flask, request, Response, render_template, jsonify, redirect, url_for
 from app import app
 
 # Dark Sky API object
@@ -63,6 +63,10 @@ def bogus_data():
 # Flask server methods
 #
 
+@app.errorhandler(500)
+def internal_error(error):
+    return "This shouldn't have happened. Please try reloading the page."
+
 @app.route("/")
 def index():
 	return render_template("index.html")
@@ -70,13 +74,13 @@ def index():
 @app.route("/weather/<lat>,<lon>")
 def info(lat, lon):
 	ua = request.user_agent
+	referrer = request.headers.get("Referer")
 	legit = request.is_xhr and \
-	ua.browser != None and \
-	ua.string != None and \
-	"curl" not in ua.string.lower() and \
-	"wget" not in ua.string.lower()
+		"curl" not in ua.string.lower() and \
+		"wget" not in ua.string.lower() and \
+		referrer == "https://peterwunder.de/playground/waybackweather/"
 
-	legit = True
+	# legit = True
 
 	if not legit:
 		sleep(randfloat(0.4, 0.8))
@@ -88,10 +92,11 @@ def info(lat, lon):
 	date_old     = date_now - relativedelta(years=50)
 
 	forecast_now_json = {
-		"temp": "{:0.1f}".format(forecast_now["currently"]["apparentTemperature"]),
+		"temp": "{:d}".format(int(forecast_now["currently"]["apparentTemperature"])),
 		"high": "{:0.1f}".format(forecast_now["daily"]["data"][0]["apparentTemperatureHigh"]),
 		"low":  "{:0.1f}".format(forecast_now["daily"]["data"][0]["apparentTemperatureLow"]),
-		"icon": hyphenated_to_camelCase(forecast_now["currently"]["icon"])
+		"icon": hyphenated_to_camelCase(forecast_now["currently"]["icon"]),
+		"unit": "f" if forecast_now["flags"]["units"] == "us" else "c"
 	}
 
 	try:
@@ -99,17 +104,19 @@ def info(lat, lon):
 		forecast_old = api.forecast_historical(lat, lon, yearsago)
 
 		forecast_old_json = {
-			"temp": "{:0.1f}".format(forecast_old["currently"]["apparentTemperature"]),
+			"temp": "{:d}".format(int(forecast_old["currently"]["apparentTemperature"])),
 			"high": "{:0.1f}".format(forecast_old["daily"]["data"][0]["apparentTemperatureHigh"]),
 			"low": "{:0.1f}".format(forecast_old["daily"]["data"][0]["apparentTemperatureLow"]),
-			"icon": hyphenated_to_camelCase(forecast_old["currently"]["icon"])
+			"icon": hyphenated_to_camelCase(forecast_old["currently"]["icon"]),
+			"unit": "f" if forecast_old["flags"]["units"] == "us" else "c"
 		}
 	except Exception as e:
 		forecast_old_json = {
 			"temp": None,
 			"high": None,
 			"low": None,
-			"icon": None
+			"icon": None,
+			"unit": None
 		}
 	
 	return jsonify({
@@ -120,3 +127,15 @@ def info(lat, lon):
 		"tz":  forecast_tz,
 		"success": True
 	})
+
+@app.route("/crash/")
+@app.route("/crash/<key>")
+def crash(key=None):
+	if key == "mrbluesky":
+		sys.exit(1)
+
+	return redirect(url_for("index"))
+
+@app.route("/error/")
+def error():
+	return "wat".encode("ascii").encode("ascii")

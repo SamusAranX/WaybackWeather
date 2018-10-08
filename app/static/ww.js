@@ -17,6 +17,14 @@ var conditions = {
 	unknown: "❗"
 }
 
+var errors = {
+	invalidData: "The API returned invalid data. 😵<br>Please tell me about this, this is not supposed to happen.",
+	noPermission: "Without your permission, Wayback Weather can't find your location.<br>Please consider granting it.",
+	positionUnavailable: "Wayback Weather can't find your location. 🤔",
+	timeout: "Finding your location took too long.<br>Please try finding an area with better connection.",
+	unknown: "An error occurred."
+}
+
 function domLoaded(e) {
 	"use strict";
 
@@ -28,12 +36,26 @@ function domLoaded(e) {
 
 	document.getElementById("btn-start").addEventListener("click", function() {
 		document.body.className = "loading";
-		navigator.geolocation.getCurrentPosition(geoSuccess, geoErr, geoOptions);
+		navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
 	}, false);
 
 	document.getElementById("btn-reload").addEventListener("click", function() {
 		window.location.reload(true);
 	}, false);
+
+	if (false) {
+		var options = { year: "numeric", month: "long",	day: "2-digit" };
+		document.querySelector(".weather.historical h3").innerHTML = (new Date()).toLocaleDateString(options);
+		document.querySelector(".weather.current h3").innerHTML = (new Date()).toLocaleDateString(options);
+		document.querySelector(".weather.historical .icon").innerHTML = conditions["hail"];
+		document.querySelector(".weather.current .icon").innerHTML = conditions["rain"];
+
+		document.querySelector(".weather.historical").classList.add("c");
+		document.querySelector(".weather.current").classList.add("f");
+
+		document.body.className = "weather";
+	}
+
 }
 
 function makeCamelCase(str) {
@@ -41,34 +63,66 @@ function makeCamelCase(str) {
 }
 
 function geoSuccess(pos) {
-	console.log(pos);
+	var lat = pos.coords.latitude;
+	var lon = pos.coords.longitude;
+
 	var xhr = new XMLHttpRequest();
+	// xhr.addEventListener("load", geoLoaded);
+	xhr.addEventListener("readystatechange", geoStateChange);
+	xhr.open("GET", `./weather/${lat},${lon}`);
 	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-	xhr.addEventListener("load", geoLoaded);
-	xhr.open("GET", "./weather");
 	xhr.send();
 }
 
-function geoLoaded() {
-	var response = JSON.parse(this.responseText);
+function geoStateChange(evt) {
+	if (evt.target.readyState === 4) {
+		if (evt.target.status === 200) {
+			geoLoaded(evt.target);
+		} else {
+			geoLoadedError(errors.invalidData);
+		}
+	}
+}
+
+function geoLoaded(xhr) {
+	console.log(xhr);
+	var response = JSON.parse(xhr.responseText);
 
 	if (!("success" in response) || !response["success"]) {
-		geoLoadedError("The API returned invalid data. 😵");
+		geoLoadedError(errors.invalidData);
 		return;
 	}
 
-	oldDate = new Date(...response["dateOld"]);
-	nowDate = new Date(...response["dateNow"]);
+	var oldDate = new Date(...response["dateOld"]);
+	var nowDate = new Date(...response["dateNow"]);
 
-	dateFormatOptions = {
+	var oldWeather = response["old"];
+	var nowWeather = response["now"];
+
+	var options = {
 		year: "numeric",
 		month: "long",
-		day: "2-digit",
-		weekday: "long"
-	}
+		day: "2-digit"
+	};
+
+	var unknownStr = "--";
 
 	document.querySelector(".weather.historical h3").innerHTML = oldDate.toLocaleDateString(options);
 	document.querySelector(".weather.current h3").innerHTML = nowDate.toLocaleDateString(options);
+
+	document.querySelector(".weather.historical .icon").innerHTML = conditions[oldWeather["icon"] || "unknown"];
+	document.querySelector(".weather.current .icon").innerHTML = conditions[nowWeather["icon"] || "unknown"];
+
+	document.querySelector(".weather.historical .temperature").innerHTML = oldWeather["temp"] || unknownStr;
+	document.querySelector(".weather.current .temperature").innerHTML    = nowWeather["temp"] || unknownStr;
+
+	document.querySelector(".weather.historical .extremes .high").innerHTML = oldWeather["high"] || unknownStr;
+	document.querySelector(".weather.historical .extremes .low").innerHTML  = oldWeather["low"] || unknownStr;
+	document.querySelector(".weather.current .extremes .high").innerHTML    = nowWeather["high"] || unknownStr;
+	document.querySelector(".weather.current .extremes .low").innerHTML     = nowWeather["low"] || unknownStr;
+
+	document.querySelector(".weather.historical").classList.add(oldWeather["unit"]);
+	document.querySelector(".weather.current").classList.add(oldWeather["unit"]);
 
 	document.body.className = "weather";
 }
@@ -78,20 +132,20 @@ function geoLoadedError(msg) {
 	document.body.className = "error";
 }
 
-function geoErr(err) {
+function geoError(err) {
 	var errMsg = "";
 	switch(err.code) {
 		case err.PERMISSION_DENIED:
-			errMsg = "Without your permission, Wayback Weather can't find your location. Please consider granting it.";
+			errMsg = errors.noPermission;
 			break;
 		case err.POSITION_UNAVAILABLE:
-			errMsg = "Wayback Weather can't find your location. 🤔";
+			errMsg = errors.positionUnavailable;
 			break;
 		case err.TIMEOUT:
-			errMsg = "Finding your location took too long. Please try finding an area with better connection.";
+			errMsg = errors.timeout;
 			break;
 		default:
-			errMsg = "An error occurred.";
+			errMsg = errors.unknown;
 	}
 
 	document.getElementById("errorMessage").innerHTML = errMsg;

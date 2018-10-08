@@ -20,12 +20,12 @@ class DarkSkyAPI():
 	API_PARAMS = {
 		"exclude": ["minutely", "hourly", "alerts"],
 		"lang": "en",
-		"units": "si"
+		"units": "auto"
 	}
 
 	def __init__(self):
 		try:
-			with open(eu("~/.config/darkpy/darkpy.json"), "r", encoding="utf8") as conf_json:
+			with open(eu("darksky_config.json"), "r", encoding="utf8") as conf_json:
 				conf = json.load(conf_json)
 				self.API_KEY = conf["key"]
 		except Exception as e:

@@ -18,15 +18,24 @@ body {
 }
 h1 {
 	font-size: 2rem;
-	margin: 0.4em auto;
+	margin: 1.5rem auto 0.5rem auto;
 	text-align: center;
+}
+h2, h3 {
+	font-size: 1.2rem;
+	font-weight: 300;
+	margin: 0;
+}
+h3 {
+	font-size: 0.9rem;
+	margin-top: 0.2rem;
 }
 p {
 	font-size: 0.9rem;
 	line-height: 1.5;
 	margin: 0;
 	text-align: center;
-	width: 320px;
+	/*width: 400px;*/
 }
 button {
 	background: #fff;
@@ -52,13 +61,24 @@ button:active {
 	justify-content: center;
 }
 
+#loading span.spin {
+	font-size: 2rem;
+}
+
 #weather {
 	display: flex;
 
 	justify-content: center;
 	align-content: stretch;
 
+	border: solid 2px #fff;
+	border-radius: 1rem;
+
+	margin: 1rem 0 1.5rem 0;
+	padding: .8rem 0;
+
 	width: 100%;
+	max-width: 320px;
 }
 
 #weather div.weather {
@@ -74,28 +94,63 @@ button:active {
 
 #weather div.weather span.icon {
 	font-size: 2rem;
+	margin: 0.5rem;
 }
 
 #weather div.weather span.temperature {
 	font-size: 3rem;
-	font-weight: 100;
+	font-weight: 200;
+
+	margin-top: -0.75rem;
+
+	position: relative;
 }
+
+#weather div.weather span.temperature:after {
+	content: "°";
+	font-weight: 600;
+	font-size: 1.5rem;
+}
+#weather div.weather.c span.temperature:after { content: "°C"; }
+#weather div.weather.f span.temperature:after { content: "°F"; }
+/*#weather div.weather span.temperature:before {
+	font-size: 0.4em;
+	font-weight: 900;
+	opacity: 0.7;
+
+	position: absolute;
+
+	bottom: 0.3em;
+	right: 0.1em;
+}
+#weather div.weather.c span.temperature:before { content: "C"; }
+#weather div.weather.f span.temperature:before { content: "F"; }*/
 
 #weather div.weather div.extremes {
 	display: flex;
 	justify-content: space-evenly;
 
 	font-size: 1rem;
-	font-weight: 300;
-	width: 64%;
+	font-weight: 500;
+	width: 75%;
 }
-#weather div.weather div.extremes span.high:before {
-	content: "↑";
-	margin: 0 0.25em 0 0;
+#weather div.weather div.extremes span {
+	background: white;
+	border-radius: 0.25em;
+	color: #fff;
+	min-width: 2em;
+	padding: 0 0.33em;
+	position: relative;
+	text-align: center;
 }
-#weather div.weather div.extremes span.low:before {
-	content: "↓";
-	margin: 0 0.25em 0 0;
+#weather div.weather div.extremes span:after {
+	content: "°";
+}
+#weather div.weather div.extremes span.high {
+	background: rgb(255, 59, 48);
+}
+#weather div.weather div.extremes span.low {
+	background: rgb(0, 122, 255);
 }
 
 footer {
@@ -140,6 +195,6 @@ body[class=weather] #weather {
 	}
 
 	#container {
-		width: 100%;
+		width: 320px;
 	}
 }
