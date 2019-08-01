@@ -65,7 +65,7 @@ def bogus_data():
 
 @app.errorhandler(500)
 def internal_error(error):
-    return "This shouldn't have happened. Please try reloading the page."
+	return jsonify({"success": False, "message": "Something went wrong. Please let me know about this."})
 
 @app.route("/")
 def index():
@@ -80,16 +80,21 @@ def info(lat, lon):
 		"wget" not in ua.string.lower() and \
 		referrer == "https://peterwunder.de/playground/waybackweather/"
 
-	# legit = True
+	legit = True
 
 	if not legit:
 		sleep(randfloat(0.4, 0.8))
 		return bogus_data()
 
-	forecast_now = api.forecast(lat, lon)
-	forecast_tz  = offset_from_iana(forecast_now["timezone"])
-	date_now     = date.today()
-	date_old     = date_now - relativedelta(years=50)
+	success, forecast_now = api.forecast(lat, lon)
+
+	if not success:
+		return jsonify({"success": False, "message": "Couldn't access weather data."})
+
+	forecast_tz = offset_from_iana(forecast_now["timezone"])
+
+	date_now  = datetime.fromtimestamp(forecast_now["currently"]["time"])
+	date_old  = date_now - relativedelta(years=50)
 
 	forecast_now_json = {
 		"temp": "{:d}".format(int(forecast_now["currently"]["apparentTemperature"])),
@@ -100,25 +105,28 @@ def info(lat, lon):
 	}
 
 	try:
-		yearsago = date_old.strftime("%Y-%m-%dT%H:%M:%S")
-		forecast_old = api.forecast_historical(lat, lon, yearsago)
+		success, forecast_old = api.forecast_historical(lat, lon, int(date_old.timestamp()))
+
+		if not success:
+			return jsonify({"success": False, "message": "Couldn't access historical weather data."})
+
+		currentTemp = None
+		if "currently" in forecast_old and "apparentTemperature" in forecast_old["currently"]:
+			currentTemp = "{:d}".format(int(forecast_old["currently"]["apparentTemperature"]))
 
 		forecast_old_json = {
-			"temp": "{:d}".format(int(forecast_old["currently"]["apparentTemperature"])),
+			"temp": currentTemp,
 			"high": "{:0.1f}".format(forecast_old["daily"]["data"][0]["apparentTemperatureHigh"]),
 			"low": "{:0.1f}".format(forecast_old["daily"]["data"][0]["apparentTemperatureLow"]),
 			"icon": hyphenated_to_camelCase(forecast_old["currently"]["icon"]),
 			"unit": "f" if forecast_old["flags"]["units"] == "us" else "c"
 		}
 	except Exception as e:
-		forecast_old_json = {
-			"temp": None,
-			"high": None,
-			"low": None,
-			"icon": None,
-			"unit": None
-		}
-	
+		if not forecast_old:
+			return jsonify({"success": False, "message": "Invalid historical weather data."})
+		else:
+			return jsonify({"success": False, "message": "Missing data."})
+
 	return jsonify({
 		"dateNow": [date_now.year, date_now.month-1, date_now.day],
 		"dateOld": [date_old.year, date_old.month-1, date_old.day],

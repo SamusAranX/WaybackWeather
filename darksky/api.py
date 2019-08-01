@@ -18,7 +18,7 @@ class DarkSkyAPI():
 
 	API_ROOT = "https://api.darksky.net/forecast"
 	API_PARAMS = {
-		"exclude": ["minutely", "hourly", "alerts"],
+		# "exclude": "minutely,hourly,alerts",
 		"lang": "en",
 		"units": "auto"
 	}
@@ -40,9 +40,9 @@ class DarkSkyAPI():
 
 		r = self.session.get(endpoint)
 		if r.status_code == requests.codes.ok:
-			return r.json()
+			return True, r.json()
 		else:
-			return {"success": False}
+			return False, r.text
 
 	def forecast_historical(self, latitude, longitude, time):
 		endpoint = f"{self.API_ROOT}/{self.API_KEY}/{latitude},{longitude},{time}"
@@ -50,6 +50,6 @@ class DarkSkyAPI():
 
 		r = self.session.get(endpoint)
 		if r.status_code == requests.codes.ok:
-			return r.json()
+			return True, r.json()
 		else:
-			return {"success": False}
+			return False, r.text
