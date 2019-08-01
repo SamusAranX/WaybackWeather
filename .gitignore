@@ -111,5 +111,3 @@ venv.bak/
 
 # uWSGI log dir
 log/
-
-darksky_config.json
